@@ -1,0 +1,12 @@
+[package]
+name = "raytracing"
+version = "0.1.0"
+authors = ["Wesley Nelson <wgn@wesnel.dev>"]
+edition = "2018"
+description = "implementing raytracing from scratch in rust"
+readme = "README.md"
+repository = "https://git.sr.ht/~wgn/raytracing"
+license-file = "LICENSE.txt"
+
+[dependencies]
+rand = "0.7.3"
