@@ -1,11 +1,11 @@
 [package]
-name = "raytracing"
+name = "ray_tracer_challenge"
 version = "0.1.0"
 authors = ["Wesley Nelson <wgn@wesnel.dev>"]
 edition = "2018"
-description = "implementing raytracing from scratch in rust"
+description = "implementing the ray tracer challenge in rust"
 readme = "README.md"
-repository = "https://git.sr.ht/~wgn/raytracing"
+repository = "https://git.sr.ht/~wgn/ray-tracer-challenge"
 license-file = "LICENSE.txt"
 
 [dependencies]
