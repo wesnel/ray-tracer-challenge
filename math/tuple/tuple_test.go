@@ -4,16 +4,13 @@ import (
 	"context"
 	"embed"
 	"fmt"
-	"math"
 	"testing"
 
 	"github.com/cucumber/godog"
 
+	"git.sr.ht/~wgn/ray-tracer-challenge/math"
 	"git.sr.ht/~wgn/ray-tracer-challenge/math/tuple"
 )
-
-// saving a difficult regexp here for reuse:
-const floatFormat = `(-?\d+\.?\d*)`
 
 // embed the cucumber feature files.  this is probably a little bit
 // more safe/portable/fast than just providing the folder name to
@@ -22,15 +19,26 @@ const floatFormat = `(-?\d+\.?\d*)`
 //go:embed features/*.feature
 var features embed.FS
 
-// small number for testing float equality:
-var epsilon = 0.00001
+// functions to get all the values in a three-tuple:
+var threeTupleGetters = map[string]func(tuple.ThreeTuple) float64{
+	"x": func(t tuple.ThreeTuple) float64 { return t.X() },
+	"y": func(t tuple.ThreeTuple) float64 { return t.Y() },
+	"z": func(t tuple.ThreeTuple) float64 { return t.Z() },
+}
 
-// functions to get all the values in a tuple:
-var getters = map[string]func(tuple.FourTuple) float64{
+// functions to get all the values in a four-tuple:
+var fourTupleGetters = map[string]func(tuple.FourTuple) float64{
 	"x": func(t tuple.FourTuple) float64 { return t.X() },
 	"y": func(t tuple.FourTuple) float64 { return t.Y() },
 	"z": func(t tuple.FourTuple) float64 { return t.Z() },
 	"w": func(t tuple.FourTuple) float64 { return t.W() },
+}
+
+// functions to get all the channels from a color:
+var channels = map[string]func(tuple.Color) float64{
+	"red":   func(c tuple.Color) float64 { return c.Red() },
+	"green": func(c tuple.Color) float64 { return c.Green() },
+	"blue":  func(c tuple.Color) float64 { return c.Blue() },
 }
 
 // initialization functions for the test scenarios:
@@ -38,25 +46,26 @@ var scenarios = []func(*godog.ScenarioContext){
 	tuples,
 	vectors,
 	points,
+	colors,
 }
 
 func tuples(sc *godog.ScenarioContext) {
 	// tuple field validation:
-	for field, getter := range getters {
+	for field, getter := range fourTupleGetters {
 		sc.Step(
 			fmt.Sprintf(`^(\w+)\.%s = %s$`,
 				field,
-				floatFormat),
+				math.FloatFormat),
 			tupleHasValue(field, getter))
 	}
 
 	// point or vector equality with tuple:
 	sc.Step(
 		fmt.Sprintf(`^(\w+) = tuple\(%s, %s, %s, %s\)$`,
-			floatFormat,
-			floatFormat,
-			floatFormat,
-			floatFormat),
+			math.FloatFormat,
+			math.FloatFormat,
+			math.FloatFormat,
+			math.FloatFormat),
 		tupleEqualsTuple)
 }
 
@@ -64,9 +73,9 @@ func vectors(sc *godog.ScenarioContext) {
 	// vector creation:
 	sc.Given(
 		fmt.Sprintf(`^(\w+) <- vector\(%s, %s, %s\)$`,
-			floatFormat,
-			floatFormat,
-			floatFormat,
+			math.FloatFormat,
+			math.FloatFormat,
+			math.FloatFormat,
 		),
 		givenVector)
 
@@ -78,71 +87,71 @@ func vectors(sc *godog.ScenarioContext) {
 	// vector addition:
 	sc.Step(
 		fmt.Sprintf(`^(\w+) \+ (\w+) = vector\(%s, %s, %s\)$`,
-			floatFormat,
-			floatFormat,
-			floatFormat),
+			math.FloatFormat,
+			math.FloatFormat,
+			math.FloatFormat),
 		addingVectorToVectorEqualsVector)
 
-	// subtracting vector from vector:
+	// vector subtraction:
 	sc.Step(
 		fmt.Sprintf(`^(v\w*|zero) - (v\w*|zero) = vector\(%s, %s, %s\)$`,
-			floatFormat,
-			floatFormat,
-			floatFormat),
+			math.FloatFormat,
+			math.FloatFormat,
+			math.FloatFormat),
 		subtractingVectorFromVectorEqualsVector)
 
 	// negating a vector:
 	sc.Step(
 		fmt.Sprintf(`^-(\w+) = vector\(%s, %s, %s\)$`,
-			floatFormat,
-			floatFormat,
-			floatFormat),
+			math.FloatFormat,
+			math.FloatFormat,
+			math.FloatFormat),
 		negatingVector)
 
 	// multiplying vector by scalar:
 	sc.Step(
 		fmt.Sprintf(`^(\w+) \* %s = vector\(%s, %s, %s\)$`,
-			floatFormat,
-			floatFormat,
-			floatFormat,
-			floatFormat),
+			math.FloatFormat,
+			math.FloatFormat,
+			math.FloatFormat,
+			math.FloatFormat),
 		multiplyingVectorByScalar)
 
 	// dividing vector by scalar:
 	sc.Step(
 		fmt.Sprintf(`^(\w+) / %s = vector\(%s, %s, %s\)$`,
-			floatFormat,
-			floatFormat,
-			floatFormat,
-			floatFormat),
+			math.FloatFormat,
+			math.FloatFormat,
+			math.FloatFormat,
+			math.FloatFormat),
 		dividingVectorByScalar)
 
 	// magnitude of vector:
 	sc.Step(
 		fmt.Sprintf(`^magnitude\((\w+)\) = %s$`,
-			floatFormat),
+			math.FloatFormat),
 		vectorMagnitude)
 
 	// normalized vector:
 	sc.Step(
 		fmt.Sprintf(`^normalize\((\w+)\) = vector\(%s, %s, %s\)$`,
-			floatFormat,
-			floatFormat,
-			floatFormat),
+			math.FloatFormat,
+			math.FloatFormat,
+			math.FloatFormat),
 		normalizedVector)
 
 	// dot product of two vectors:
 	sc.Step(
 		fmt.Sprintf(`^dot\((\w+), (\w+)\) = %s$`,
-			floatFormat),
+			math.FloatFormat),
 		vectorDotProduct)
 
 	// cross product of two vectors:
 	sc.Step(
 		fmt.Sprintf(`^cross\((\w+), (\w+)\) = vector\(%s, %s, %s\)$`,
-			floatFormat,
-			floatFormat,
-			floatFormat),
+			math.FloatFormat,
+			math.FloatFormat,
+			math.FloatFormat),
 		vectorCrossProduct)
 }
 
@@ -150,35 +159,79 @@ func points(sc *godog.ScenarioContext) {
 	// point creation:
 	sc.Given(
 		fmt.Sprintf(`^(\w+) <- point\(%s, %s, %s\)$`,
-			floatFormat,
-			floatFormat,
-			floatFormat,
+			math.FloatFormat,
+			math.FloatFormat,
+			math.FloatFormat,
 		),
 		givenPoint)
 
 	// point subtraction:
 	sc.Step(
 		fmt.Sprintf(`^(p\w*) - (p\w*) = vector\(%s, %s, %s\)$`,
-			floatFormat,
-			floatFormat,
-			floatFormat),
+			math.FloatFormat,
+			math.FloatFormat,
+			math.FloatFormat),
 		subtractingPointFromPointEqualsVector)
 
 	// subtracting vector from point:
 	sc.Step(
 		fmt.Sprintf(`^(\w+) - (\w+) = point\(%s, %s, %s\)$`,
-			floatFormat,
-			floatFormat,
-			floatFormat),
+			math.FloatFormat,
+			math.FloatFormat,
+			math.FloatFormat),
 		subtractingVectorFromPointEqualsPoint)
 }
 
-// approximately tests the equality of two floating point numbers by
-// checking if their absolute difference is within a threshold:
-func equals(epsilon float64) func(float64, float64) bool {
-	return func(expected, got float64) bool {
-		return math.Abs(expected-got) < epsilon
+func colors(sc *godog.ScenarioContext) {
+	// color creation:
+	sc.Given(
+		fmt.Sprintf(`^(\w+) <- color\(%s, %s, %s\)$`,
+			math.FloatFormat,
+			math.FloatFormat,
+			math.FloatFormat),
+		givenColor)
+
+	// color field validation:
+	for field, getter := range channels {
+		sc.Step(
+			fmt.Sprintf(`^(\w+)\.%s = %s$`,
+				field,
+				math.FloatFormat),
+			colorHasValue(field, getter))
 	}
+
+	// color addition:
+	sc.Step(
+		fmt.Sprintf(`^(\w+) \+ (\w+) = color\(%s, %s, %s\)$`,
+			math.FloatFormat,
+			math.FloatFormat,
+			math.FloatFormat),
+		addingColorToColorEqualsColor)
+
+	// color subtraction:
+	sc.Step(
+		fmt.Sprintf(`^(\w+) - (\w+) = color\(%s, %s, %s\)$`,
+			math.FloatFormat,
+			math.FloatFormat,
+			math.FloatFormat),
+		subtractingColorFromColorEqualsColor)
+
+	// multiplying color by scalar:
+	sc.Step(
+		fmt.Sprintf(`^(\w+) \* %s = color\(%s, %s, %s\)$`,
+			math.FloatFormat,
+			math.FloatFormat,
+			math.FloatFormat,
+			math.FloatFormat),
+		multiplyingColorByScalar)
+
+	// multiplying colors:
+	sc.Step(
+		fmt.Sprintf(`^(\w+) \* (c\w*) = color\(%s, %s, %s\)$`,
+			math.FloatFormat,
+			math.FloatFormat,
+			math.FloatFormat),
+		multiplyingColorWithColorEqualsColor)
 }
 
 type ctxKey string
@@ -214,6 +267,16 @@ func givenNormalizedVector(
 	}
 
 	return context.WithValue(ctx, ctxKey(new), copy), nil
+}
+
+func givenColor(
+	ctx context.Context,
+	name string,
+	red,
+	green,
+	blue float64,
+) (context.Context, error) {
+	return context.WithValue(ctx, ctxKey(name), tuple.NewColor(red, green, blue)), nil
 }
 
 func newNormalizedVector(
@@ -271,12 +334,44 @@ func getVectorByName(
 	return got, nil
 }
 
-func tupleEquality(
+func getColorByName(
+	ctx context.Context,
+	name string,
+) (tuple.Color, error) {
+	got, ok := ctx.Value(ctxKey(name)).(tuple.Color)
+	if !ok {
+		return got, fmt.Errorf("invalid color variable name %s",
+			name)
+	}
+
+	return got, nil
+}
+
+func threeTupleEquality(
+	name string,
+	expected,
+	got tuple.ThreeTuple,
+) error {
+	for field, getter := range threeTupleGetters {
+		if err := compareValues(
+			name,
+			field,
+			getter(expected),
+			getter(got),
+		); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func fourTupleEquality(
 	name string,
 	expected,
 	got tuple.FourTuple,
 ) error {
-	for field, getter := range getters {
+	for field, getter := range fourTupleGetters {
 		if err := compareValues(
 			name,
 			field,
@@ -296,7 +391,7 @@ func compareValues(
 	expected,
 	got float64,
 ) error {
-	if !equals(epsilon)(expected, got) {
+	if !math.Equals(math.Epsilon)(expected, got) {
 		return fmt.Errorf("for %s of tuple %s: expected %v but got %v",
 			field,
 			name,
@@ -334,6 +429,33 @@ func tupleHasValue(
 	}
 }
 
+func colorHasValue(
+	field string,
+	getter func(tuple.Color) float64,
+) func(
+	ctx context.Context,
+	name string,
+	expected float64,
+) error {
+	return func(
+		ctx context.Context,
+		name string,
+		expected float64,
+	) error {
+		got, err := getColorByName(ctx, name)
+		if err != nil {
+			return err
+		}
+
+		return compareValues(
+			name,
+			field,
+			expected,
+			getter(got),
+		)
+	}
+}
+
 func tupleEqualsTuple(
 	ctx context.Context,
 	name string,
@@ -349,16 +471,16 @@ func tupleEqualsTuple(
 
 	switch w {
 	case 0.0:
-		return tupleEquality(name, tuple.NewVector(x, y, z), got)
+		return fourTupleEquality(name, tuple.NewVector(x, y, z), got)
 	case 1.0:
-		return tupleEquality(name, tuple.NewPoint(x, y, z), got)
+		return fourTupleEquality(name, tuple.NewPoint(x, y, z), got)
 	default:
 		return fmt.Errorf("invalid w value %v", w)
 	}
 }
 
-func testBinaryOperationReturningTuple[
-	A tuple.FourTuple,
+func testBinaryOperationReturningFourTuple[
+	A,
 	B any,
 	C tuple.FourTuple,
 ](
@@ -380,7 +502,37 @@ func testBinaryOperationReturningTuple[
 
 	got := operation(left, right)
 
-	return tupleEquality(
+	return fourTupleEquality(
+		description,
+		expected,
+		got,
+	)
+}
+
+func testBinaryOperationReturningThreeTuple[
+	A,
+	B any,
+	C tuple.ThreeTuple,
+](
+	getLeft func() (A, error),
+	getRight func() (B, error),
+	operation func(A, B) C,
+	description string,
+	expected C,
+) error {
+	left, err := getLeft()
+	if err != nil {
+		return err
+	}
+
+	right, err := getRight()
+	if err != nil {
+		return err
+	}
+
+	got := operation(left, right)
+
+	return threeTupleEquality(
 		description,
 		expected,
 		got,
@@ -426,7 +578,7 @@ func addingVectorToVectorEqualsVector(
 	y,
 	z float64,
 ) error {
-	return testBinaryOperationReturningTuple(
+	return testBinaryOperationReturningFourTuple(
 		func() (tuple.Vector, error) {
 			return getVectorByName(ctx, leftName)
 		},
@@ -441,6 +593,29 @@ func addingVectorToVectorEqualsVector(
 	)
 }
 
+func addingColorToColorEqualsColor(
+	ctx context.Context,
+	leftName,
+	rightName string,
+	x,
+	y,
+	z float64,
+) error {
+	return testBinaryOperationReturningThreeTuple(
+		func() (tuple.Color, error) {
+			return getColorByName(ctx, leftName)
+		},
+		func() (tuple.Color, error) {
+			return getColorByName(ctx, rightName)
+		},
+		func(left, right tuple.Color) tuple.Color {
+			return left.AddColor(right)
+		},
+		fmt.Sprintf("%s + %s", leftName, rightName),
+		tuple.NewColor(x, y, z),
+	)
+}
+
 func subtractingPointFromPointEqualsVector(
 	ctx context.Context,
 	leftName,
@@ -449,7 +624,7 @@ func subtractingPointFromPointEqualsVector(
 	y,
 	z float64,
 ) error {
-	return testBinaryOperationReturningTuple(
+	return testBinaryOperationReturningFourTuple(
 		func() (tuple.Point, error) {
 			return getPointByName(ctx, leftName)
 		},
@@ -472,7 +647,7 @@ func subtractingVectorFromPointEqualsPoint(
 	y,
 	z float64,
 ) error {
-	return testBinaryOperationReturningTuple(
+	return testBinaryOperationReturningFourTuple(
 		func() (tuple.Point, error) {
 			return getPointByName(ctx, leftName)
 		},
@@ -495,7 +670,7 @@ func subtractingVectorFromVectorEqualsVector(
 	y,
 	z float64,
 ) error {
-	return testBinaryOperationReturningTuple(
+	return testBinaryOperationReturningFourTuple(
 		func() (tuple.Vector, error) {
 			return getVectorByName(ctx, leftName)
 		},
@@ -510,6 +685,52 @@ func subtractingVectorFromVectorEqualsVector(
 	)
 }
 
+func subtractingColorFromColorEqualsColor(
+	ctx context.Context,
+	leftName,
+	rightName string,
+	x,
+	y,
+	z float64,
+) error {
+	return testBinaryOperationReturningThreeTuple(
+		func() (tuple.Color, error) {
+			return getColorByName(ctx, leftName)
+		},
+		func() (tuple.Color, error) {
+			return getColorByName(ctx, rightName)
+		},
+		func(left, right tuple.Color) tuple.Color {
+			return left.SubColor(right)
+		},
+		fmt.Sprintf("%s - %s", leftName, rightName),
+		tuple.NewColor(x, y, z),
+	)
+}
+
+func multiplyingColorWithColorEqualsColor(
+	ctx context.Context,
+	leftName,
+	rightName string,
+	x,
+	y,
+	z float64,
+) error {
+	return testBinaryOperationReturningThreeTuple(
+		func() (tuple.Color, error) {
+			return getColorByName(ctx, leftName)
+		},
+		func() (tuple.Color, error) {
+			return getColorByName(ctx, rightName)
+		},
+		func(left, right tuple.Color) tuple.Color {
+			return left.MulColor(right)
+		},
+		fmt.Sprintf("%s * %s", leftName, rightName),
+		tuple.NewColor(x, y, z),
+	)
+}
+
 func negatingVector(
 	ctx context.Context,
 	name string,
@@ -517,7 +738,7 @@ func negatingVector(
 	y,
 	z float64,
 ) error {
-	return testBinaryOperationReturningTuple(
+	return testBinaryOperationReturningFourTuple(
 		func() (tuple.Vector, error) {
 			return getVectorByName(ctx, name)
 		},
@@ -540,7 +761,7 @@ func multiplyingVectorByScalar(
 	y,
 	z float64,
 ) error {
-	return testBinaryOperationReturningTuple(
+	return testBinaryOperationReturningFourTuple(
 		func() (tuple.Vector, error) {
 			return getVectorByName(ctx, name)
 		},
@@ -555,6 +776,29 @@ func multiplyingVectorByScalar(
 	)
 }
 
+func multiplyingColorByScalar(
+	ctx context.Context,
+	name string,
+	scalar,
+	x,
+	y,
+	z float64,
+) error {
+	return testBinaryOperationReturningThreeTuple(
+		func() (tuple.Color, error) {
+			return getColorByName(ctx, name)
+		},
+		func() (float64, error) {
+			return scalar, nil
+		},
+		func(left tuple.Color, scalar float64) tuple.Color {
+			return left.Scale(scalar)
+		},
+		fmt.Sprintf("%s * %v", name, scalar),
+		tuple.NewColor(x, y, z),
+	)
+}
+
 func dividingVectorByScalar(
 	ctx context.Context,
 	name string,
@@ -563,7 +807,7 @@ func dividingVectorByScalar(
 	y,
 	z float64,
 ) error {
-	return testBinaryOperationReturningTuple(
+	return testBinaryOperationReturningFourTuple(
 		func() (tuple.Vector, error) {
 			return getVectorByName(ctx, name)
 		},
@@ -589,7 +833,7 @@ func vectorMagnitude(
 	}
 
 	got := vec.Magnitude()
-	if !equals(epsilon)(expected, got) {
+	if !math.Equals(math.Epsilon)(expected, got) {
 		return fmt.Errorf("for vector %s: expected magnitude %v but got %v",
 			name,
 			expected,
@@ -611,7 +855,7 @@ func normalizedVector(
 		return err
 	}
 
-	return tupleEquality(
+	return fourTupleEquality(
 		fmt.Sprintf("normalize(%s)", name),
 		tuple.NewVector(x, y, z),
 		copy,
@@ -647,7 +891,7 @@ func vectorCrossProduct(
 	y,
 	z float64,
 ) error {
-	return testBinaryOperationReturningTuple(
+	return testBinaryOperationReturningFourTuple(
 		func() (tuple.Vector, error) {
 			return getVectorByName(ctx, leftName)
 		},
@@ -655,7 +899,7 @@ func vectorCrossProduct(
 			return getVectorByName(ctx, rightName)
 		},
 		func(left, right tuple.Vector) tuple.Vector {
-			return left.CrossProduct(right)
+			return left.Cross(right)
 		},
 		fmt.Sprintf("cross(%s, %s)", leftName, rightName),
 		tuple.NewVector(x, y, z),

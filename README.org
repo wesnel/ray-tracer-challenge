@@ -1,3 +1,8 @@
+#+html: <a href="https://sonarcloud.io/summary/new_code?id=wesnel_ray-tracer-challenge"><img alt="Lines of Code" src="https://sonarcloud.io/api/project_badges/measure?project=wesnel_ray-tracer-challenge&metric=nloc"/></a>
+#+html: <a href="https://sonarcloud.io/summary/new_code?id=wesnel_ray-tracer-challenge"><img alt="Coverage" src="https://sonarcloud.io/api/project_badges/measure?project=wesnel_ray-tracer-challenge&metric=coverage"/></a>
+#+html: <a href="https://sonarcloud.io/summary/new_code?id=wesnel_ray-tracer-challenge"><img alt="Bugs" src="https://sonarcloud.io/api/project_badges/measure?project=wesnel_ray-tracer-challenge&metric=bugs"/></a>
+#+html: <a href="https://sonarcloud.io/summary/new_code?id=wesnel_ray-tracer-challenge"><img alt="Code Smells" src="https://sonarcloud.io/api/project_badges/measure?project=wesnel_ray-tracer-challenge&metric=code_smells"/></a>
+
 * References
 
 #+html: <img src="http://raytracerchallenge.com/images/cover.jpg" align="right" width="30%">

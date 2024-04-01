@@ -9,7 +9,7 @@ type Vector interface {
 
 	AddVector(Vector) Vector
 	SubVector(Vector) Vector
-	CrossProduct(Vector) Vector
+	Cross(Vector) Vector
 
 	Scale(float64) Vector
 	Div(float64) Vector
@@ -22,15 +22,17 @@ type Vector interface {
 
 func NewVector(x, y, z float64) Vector {
 	return &vector{
-		x: x,
-		y: y,
-		z: z,
+		tuple: tuple{
+			x: x,
+			y: y,
+			z: z,
+		},
 	}
 }
 
-// HACK: Please make sure that the `vector` struct always has the
-// exact same memory layout as `point` struct, because there are some
-// unsafe pointer operations here which depends on that fact.
+// HACK: please make sure that the `vector` struct always has the
+// exact same memory layout as the `tuple` struct, because there are
+// some unsafe pointer operations here which depends on that fact.
 //
 // HACK: although the `Vector` interface allows for either mutable or
 // immutable vectors (all methods return a value), this vector is
@@ -38,21 +40,7 @@ func NewVector(x, y, z float64) Vector {
 // itself and then returns its own pointer in each operation.  this
 // should reduce memory allocations.
 type vector struct {
-	x float64
-	y float64
-	z float64
-}
-
-func (v vector) X() float64 {
-	return v.x
-}
-
-func (v vector) Y() float64 {
-	return v.y
-}
-
-func (v vector) Z() float64 {
-	return v.z
+	tuple
 }
 
 func (v vector) W() float64 {
@@ -64,22 +52,14 @@ func (v vector) W() float64 {
 }
 
 func (v *vector) AddVector(other Vector) Vector {
-	v.x += other.X()
-	v.y += other.Y()
-	v.z += other.Z()
-
-	return v
+	return (*vector)(v.add(other).ToUnsafePointer())
 }
 
 func (v *vector) SubVector(other Vector) Vector {
-	v.x -= other.X()
-	v.y -= other.Y()
-	v.z -= other.Z()
-
-	return v
+	return (*vector)(v.sub(other).ToUnsafePointer())
 }
 
-func (v vector) CrossProduct(other Vector) Vector {
+func (v vector) Cross(other Vector) Vector {
 	return NewVector(
 		v.y*other.Z()-v.z*other.Y(),
 		v.z*other.X()-v.x*other.Z(),

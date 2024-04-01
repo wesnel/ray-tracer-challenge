@@ -1,11 +1,8 @@
 module git.sr.ht/~wgn/ray-tracer-challenge
 
-go 1.21.7
+go 1.18
 
-require (
-	github.com/cucumber/godog v0.14.0
-	golang.org/x/exp v0.0.0-20240325151524-a685a6edb6d8
-)
+require github.com/cucumber/godog v0.14.0
 
 require (
 	github.com/cucumber/gherkin/go/v26 v26.2.0 // indirect
