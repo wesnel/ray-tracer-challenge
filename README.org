@@ -1,0 +1,32 @@
+* References
+
+#+html: <img src="http://raytracerchallenge.com/images/cover.jpg" align="right" width="30%">
+
+- [[http://raytracerchallenge.com/][The Ray Tracer Challenge: A Test-Driven Guide to Your First 3D Renderer by Jamis Buck]]
+
+  This book is the primary focus of this project.  It explains how to
+  create a ray tracer from scratch, and it does so by using [[https://cucumber.io/][Cucumber]]
+  tests to fully specify each behavior, including edge cases.  In this
+  repository, all of my Cucumber tests are more or less copied from
+  the book, and I parse and execute them using [[https://github.com/cucumber/godog][godog]].
+
+  However, since I am using a programming language with static types,
+  I felt that I was able to make a diversion from the book early on:
+  instead of treating vectors and points as variations of a
+  four-dimensional "tuple" with either 0 or 1 (respectively) in the
+  fourth component, I instead ignore this fourth component and rely on
+  the static type system to tell me whether a value is a point or a
+  vector.  This choice leads to some major changes in the early tests
+  from the book.
+
+#+html: <img src="https://foundationsofgameenginedev.com/vol1.jpg" align="right" width="30%">
+
+- [[https://foundationsofgameenginedev.com/][Foundations of Game Engine Development, Volume 1: Mathematics by Eric Lengyel]]
+
+  This book contains some more advanced and optimized approaches to
+  the mathematics used in the ray tracer.  I have replaced some of the
+  algorithm implementations described in /The Ray Tracer Challenge/ with
+  some alternatives from /Foundations of Game Engine Development/
+  instead.  In particular, since this ray tracer deals with
+  [[https://wikipedia.org/wiki/Homogeneous_coordinates][homogeneous coordinates]], we are able to use an optimized approach to
+  find the inverse of matrices of this specific form.
