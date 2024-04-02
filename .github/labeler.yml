@@ -1,0 +1,16 @@
+"changes: docs":
+  - "README.org"
+
+"changes: ci":
+  - ".github/*"
+  - ".github/**/*"
+
+"changes: build":
+  - "go.mod"
+  - "go.sum"
+
+"changes: unit tests":
+  - "**/*_test.go"
+
+"changes: feature tests":
+  - "**/*.feature"
